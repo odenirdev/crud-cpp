@@ -1,8 +1,8 @@
 // CRUD PESSOA
 
-// REGRAS DE PROGRAMAÇÃO
+// REGRAS DE PROGRAMAÃ‡ÃƒO
 // CONTANTES EM MAIUSCULO
-// VARIAVEIS, FUNCOES EM MINUSCULO QUEBRAS DE PALAVRAS COMEÇANDO COM LETRA MAIUSCULA
+// VARIAVEIS, FUNCOES EM MINUSCULO QUEBRAS DE PALAVRAS COMEÃ‡ANDO COM LETRA MAIUSCULA
 // LETRA DA PROXIMA PALAVRA EM MAIUSCULO
 
 #include<iostream>
@@ -33,10 +33,10 @@ long pegarNumerosDePessoas(){
     return pessoas;
 }
 
-bool inserirArquivo(PESSOA p) {
+bool inserirArquivo(PESSOA pessoa) {
     ofstream arquivo(ARQUIVO_CRUD, ios_base::app | ios_base::binary);
-    arquivo.write(reinterpret_cast<char*>(&p.nome), sizeof(p.nome));
-    arquivo.write(reinterpret_cast<char*>(&p.sobrenome), sizeof(p.sobrenome));
+    arquivo.write(reinterpret_cast<char*>(&pessoa.nome), sizeof(pessoa.nome));
+    arquivo.write(reinterpret_cast<char*>(&pessoa.sobrenome), sizeof(pessoa.sobrenome));
     return true;
 }
 
@@ -48,8 +48,8 @@ void cadastrar(void)
     PESSOA p;
     cout << endl << "<Cadastrar>"   << endl;
 
-    cout << endl << "Nome: ";   cin.getline(p.nome, sizeof(p.nome));
-    cout << "Sobrenome: ";      cin.getline(p.sobrenome, sizeof(p.sobrenome));
+    cout << endl << "Nome: ";   cin.getline(pessoa.nome, sizeof(pessoa.nome));
+    cout << "Sobrenome: ";      cin.getline(pessoa.sobrenome, sizeof(pessoa.sobrenome));
     cout << sizeof(p);
     inserirArquivo(p);
 
@@ -60,12 +60,12 @@ void listar(void)
 {
     PESSOA pessoa;
     ifstream arquivo(ARQUIVO_CRUD, ios_base::in | ios_base::binary);
-    for (long pos = 0; pos == pegarTamanhoDoArquivo(); pos += sizeof(pessoa)){
+    for (long pos = 0; pos < pegarTamanhoDoArquivo(); pos += 1){
         arquivo.seekg(pos * sizeof(pessoa), // ios::beg - pular
           ios_base::beg);
         arquivo.read(reinterpret_cast<char*>(&pessoa.nome), sizeof(pessoa.nome));
           return;
-        cout << "Valor " << pessoa.nome << " na posicao ";
+        cout << "Valor " << pessoa.nome;
     }
 
     return;
