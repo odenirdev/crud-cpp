@@ -6,15 +6,49 @@
 // LETRA DA PROXIMA PALAVRA EM MAIUSCULO
 
 #include<iostream>
-#include <fstream>
+#include<fstream>
+#include<cstring>
 
 #define ARQUIVO_CRUD "PESSOAS.CRUD"
 
 using namespace std;
 
-struct PESSOA {
-    int  id;
-    char nome[50];
+class PESSOA {
+    private:
+        int  id;
+        char nome[51];
+        char dataNascimento[11];
+
+    public:
+        // Getters e Setters ID
+        int getId(void){
+            return this->id;
+        }
+
+        void setId(int id){
+            this->id = id;
+            return;
+        }
+
+        // Getters e Setters Nome
+        char* getNome(void){
+            return this->nome;
+        }
+
+        void setNome(char nome[51]){
+            strcpy(this->nome, nome);
+            return;
+        }
+
+        // Getters e Setters Data de nascimento
+        char* getDataNascimento(void){
+            return this->dataNascimento;
+        }
+
+        void setDataNascimento(char data[11]){
+            strcpy(this->dataNascimento, data);
+            return;
+        }
 };
 
 long int pegarTamanhoDoArquivo(){
@@ -35,51 +69,123 @@ long int pegarNumerosDePessoas(){
 
 bool inserirArquivo(PESSOA pessoa) {
     ofstream arquivo(ARQUIVO_CRUD, ios_base::app | ios_base::binary);
-    arquivo.write(reinterpret_cast<char*>(&pessoa.id),   sizeof(pessoa.id));
-    arquivo.write(reinterpret_cast<char*>(&pessoa.nome), sizeof(pessoa.nome));
+    arquivo.write(reinterpret_cast<char*>(&pessoa), sizeof(pessoa));
     arquivo.close();
     return true;
 }
 
 void cadastrar(void)
 {
+    char nome[51];
+    char data[11];
     PESSOA pessoa;
 
     cout << endl << "<Cadastrar>"   << endl;
-    cout << endl << "Nome: ";
-    cin.getline(pessoa.nome, sizeof(pessoa.nome));
 
-    pessoa.id = pegarNumerosDePessoas() + 1;
+    cout << endl << "Nome: ";
+    cin.getline(nome, sizeof(nome));
+
+    cout << "Data de nascimento: ";
+    cin.getline(data, sizeof(data));
+
+    pessoa.setNome(nome);
+    pessoa.setDataNascimento(data);
+    pessoa.setId(pegarNumerosDePessoas() + 1);
+
     inserirArquivo(pessoa);
 
     return;
 }
 
-void listar(void)
-{
-    cout << pegarNumerosDePessoas();
-    cout << endl <<"<Lista de pessoas>" << endl;
+void listarUm(int idRegistro){
     PESSOA pessoa;
+    cout << endl << "<Registro>" << endl;
+    ifstream arquivo(ARQUIVO_CRUD, ios_base::in | ios_base::binary);
+    arquivo.seekg((idRegistro - 1) * sizeof(pessoa), ios_base::beg);
+    arquivo.read(reinterpret_cast<char*>(&pessoa), sizeof(pessoa));
+    cout << "ID: "   << pessoa.getId()   << endl;
+    cout << "Nome: " << pessoa.getNome() << endl;
+    cout << "Data de nascimento: " << pessoa.getDataNascimento() << endl;
+    arquivo.close();
+    return;
+}
+
+void listarTodos(void)
+{
+    PESSOA pessoa;
+    cout << endl <<"<Lista de pessoas>" << endl;
     ifstream arquivo(ARQUIVO_CRUD, ios_base::in | ios_base::binary);
     for (long pos = 0; pos < pegarNumerosDePessoas(); pos += 1){
         arquivo.seekg(pos * sizeof(pessoa), // ios::beg - pular
-          ios_base::beg);
-        arquivo.read(reinterpret_cast<char*>(&pessoa),   sizeof(pessoa));
+        ios_base::beg);
+        arquivo.read(reinterpret_cast<char*>(&pessoa), sizeof(pessoa));
         cout << endl;
-        cout << "ID: "   << pessoa.id << endl;
-        cout << "Nome: " << pessoa.nome << endl;
+        cout << "ID: "   << pessoa.getId()   << endl;
+        cout << "Nome: " << pessoa.getNome() << endl;
+        cout << "Data de nascimento: " << pessoa.getDataNascimento() << endl;
     }
     arquivo.close();
     return;
 }
 
+void alterarNome(int idRegistro){
+    char nome[51];
+    cout << endl << "<Alterar Nome>" << endl;
+    listarUm(idRegistro);
+    cout << "Novo Nome: ";
+    cin.getline(nome, sizeof(nome));
+}
+
 void alterar(void)
 {
+    int opcao;
+    int opcao1;
+    do {
+        cout << endl << "<Alterar registro de pessoa>" << endl;
+        listarTodos();
+        cout << endl << "Selecione um registro pelo ID ou para sair entre com <0>!" << endl;
+        cout << "Entre com a opcao: ";
+        cin >> opcao;
+        cin.ignore(1000, '\n');
+
+        if (opcao <= pegarNumerosDePessoas()){
+            cout << endl <<"<Opcao de Alteracao>" << endl;
+            cout << "1. Alterar nome" << endl;
+            cout << "2. Alterar data de nascimento" << endl;
+            cout << "0. Sair" << endl;
+            cout << endl << "Entre com a opcao: ";
+            cin >> opcao1;
+            cin.ignore(1000, '\n');
+
+            switch(opcao1){
+                case 1:
+                    alterarNome(opcao);
+                    break;
+
+                case 2:
+                    //alterarDataNascimento();
+                    break;
+
+                case 0:
+                    break;
+
+                default:
+                    cerr << endl << "Opcao Invalida!" << endl;
+                    break;
+            }
+        } else {
+            cerr << endl << "Opcao Invalida!" << endl;
+        }
+
+    } while(opcao != 0);
     return;
 }
 
 void deletar(void)
 {
+    cout << sizeof(PESSOA) << endl;
+    cout << pegarTamanhoDoArquivo() << endl;
+    cout << pegarNumerosDePessoas() << endl;
     return;
 }
 
@@ -99,7 +205,7 @@ void menu(void)
                 cadastrar();
                 break;
             case 2:
-                listar();
+                listarTodos();
                 break;
             case 3:
                 alterar();
