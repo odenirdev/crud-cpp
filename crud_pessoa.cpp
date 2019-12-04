@@ -18,6 +18,7 @@ class PESSOA {
         int  id;
         char nome[51];
         char dataNascimento[11];
+        //int  status;
 
     public:
         // Getters e Setters ID
@@ -49,6 +50,16 @@ class PESSOA {
             strcpy(this->dataNascimento, data);
             return;
         }
+
+        // Getters e Setters Status | Se o status for 1 = ativo se for 0 = inativo
+        int getStatus(void){
+            return 1;
+//            return this->status;
+        }
+
+        void setStatus(int status){
+          //  this->status = status;
+        }
 };
 
 long int pegarTamanhoDoArquivo(){
@@ -58,6 +69,7 @@ long int pegarTamanhoDoArquivo(){
     arquivo.seekg(0, ios_base::end); // seekg() - Posicione para pegar / ios_base:"PESSOAS.CRUD":end - final do arquivo
     tamanho = arquivo.tellg(); //tellg() - pegar valor em bits
     if (tamanho == -1) tamanho = 0;
+    arquivo.close();
     return tamanho;
 }
 
@@ -70,6 +82,7 @@ long int pegarNumerosDePessoas(){
 bool inserirArquivo(PESSOA pessoa) {
     ofstream arquivo(ARQUIVO_CRUD, ios_base::app | ios_base::binary);
     arquivo.write(reinterpret_cast<char*>(&pessoa), sizeof(pessoa));
+    arquivo.flush();
     arquivo.close();
     return true;
 }
@@ -91,23 +104,20 @@ void cadastrar(void)
     pessoa.setNome(nome);
     pessoa.setDataNascimento(data);
     pessoa.setId(pegarNumerosDePessoas() + 1);
+    //pessoa.setStatus(1);
 
     inserirArquivo(pessoa);
 
     return;
 }
 
-void listarUm(int idRegistro){
+PESSOA buscarUm(int idRegistro){
     PESSOA pessoa;
-    cout << endl << "<Registro>" << endl;
     ifstream arquivo(ARQUIVO_CRUD, ios_base::in | ios_base::binary);
     arquivo.seekg((idRegistro - 1) * sizeof(pessoa), ios_base::beg);
     arquivo.read(reinterpret_cast<char*>(&pessoa), sizeof(pessoa));
-    cout << "ID: "   << pessoa.getId()   << endl;
-    cout << "Nome: " << pessoa.getNome() << endl;
-    cout << "Data de nascimento: " << pessoa.getDataNascimento() << endl;
     arquivo.close();
-    return;
+    return pessoa;
 }
 
 void listarTodos(void)
@@ -128,12 +138,38 @@ void listarTodos(void)
     return;
 }
 
+void alterarArquivo(int idRegistro, PESSOA registro){
+    if (idRegistro <= pegarNumerosDePessoas()){
+        ofstream arquivo(ARQUIVO_CRUD, ios_base::out | ios_base::binary);
+        arquivo.seekp((idRegistro - 1) * sizeof(registro), ios_base::beg);
+        arquivo.write(reinterpret_cast<char*>(&registro), sizeof(registro));
+        arquivo.flush();
+        arquivo.close();
+    } else cerr << endl << "Identificador Invalido!" << endl;
+}
+
 void alterarNome(int idRegistro){
+    PESSOA pessoa;
     char nome[51];
     cout << endl << "<Alterar Nome>" << endl;
-    listarUm(idRegistro);
-    cout << "Novo Nome: ";
+    pessoa = buscarUm(idRegistro);
+    cout << endl << "Novo Nome: ";
     cin.getline(nome, sizeof(nome));
+    pessoa.setNome(nome);
+    alterarArquivo(idRegistro, pessoa);
+    return;
+}
+
+void alterarDataNascimento(int idRegistro){
+    PESSOA pessoa;
+    char data[11];
+    cout << endl << "<Alterar Data de Nascimento>" << endl;
+    pessoa = buscarUm(idRegistro);
+    cout << endl << "Nova data de nascimento: ";
+    cin.getline(data, sizeof(data));
+    pessoa.setDataNascimento(data);
+    alterarArquivo(idRegistro, pessoa);
+    return;
 }
 
 void alterar(void)
@@ -148,35 +184,33 @@ void alterar(void)
         cin >> opcao;
         cin.ignore(1000, '\n');
 
-        if (opcao <= pegarNumerosDePessoas()){
-            cout << endl <<"<Opcao de Alteracao>" << endl;
-            cout << "1. Alterar nome" << endl;
-            cout << "2. Alterar data de nascimento" << endl;
-            cout << "0. Sair" << endl;
-            cout << endl << "Entre com a opcao: ";
-            cin >> opcao1;
-            cin.ignore(1000, '\n');
+        if (opcao != 0)
+            if (opcao <= pegarNumerosDePessoas()){
+                cout << endl <<"<Opcao de Alteracao>" << endl;
+                cout << "1. Alterar nome" << endl;
+                cout << "2. Alterar data de nascimento" << endl;
+                cout << "0. Sair" << endl;
+                cout << endl << "Entre com a opcao: ";
+                cin >> opcao1;
+                cin.ignore(1000, '\n');
 
-            switch(opcao1){
-                case 1:
-                    alterarNome(opcao);
-                    break;
+                switch(opcao1){
+                    case 1:
+                        alterarNome(opcao);
+                        break;
 
-                case 2:
-                    //alterarDataNascimento();
-                    break;
+                    case 2:
+                        alterarDataNascimento(opcao);
+                        break;
 
-                case 0:
-                    break;
+                    case 0:
+                        break;
 
-                default:
-                    cerr << endl << "Opcao Invalida!" << endl;
-                    break;
-            }
-        } else {
-            cerr << endl << "Opcao Invalida!" << endl;
-        }
-
+                    default:
+                        cerr << endl << "Opcao Invalida!" << endl;
+                        break;
+                }
+            } else cerr << endl << "Opcao Invalida!" << endl;
     } while(opcao != 0);
     return;
 }
