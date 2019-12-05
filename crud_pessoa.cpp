@@ -18,7 +18,7 @@ class PESSOA {
         int  id;
         char nome[51];
         char dataNascimento[11];
-        //int  status;
+        int  status;
 
     public:
         // Getters e Setters ID
@@ -53,12 +53,11 @@ class PESSOA {
 
         // Getters e Setters Status | Se o status for 1 = ativo se for 0 = inativo
         int getStatus(void){
-            return 1;
-//            return this->status;
+            return this->status;
         }
 
         void setStatus(int status){
-          //  this->status = status;
+          this->status = status;
         }
 };
 
@@ -104,7 +103,7 @@ void cadastrar(void)
     pessoa.setNome(nome);
     pessoa.setDataNascimento(data);
     pessoa.setId(pegarNumerosDePessoas() + 1);
-    //pessoa.setStatus(1);
+    pessoa.setStatus(1);
 
     inserirArquivo(pessoa);
 
@@ -140,10 +139,9 @@ void listarTodos(void)
 
 void alterarArquivo(int idRegistro, PESSOA registro){
     if (idRegistro <= pegarNumerosDePessoas()){
-        ofstream arquivo(ARQUIVO_CRUD, ios_base::out | ios_base::binary);
+        fstream arquivo(ARQUIVO_CRUD, ios_base::out | ios_base::in | ios_base::binary);
         arquivo.seekp((idRegistro - 1) * sizeof(registro), ios_base::beg);
         arquivo.write(reinterpret_cast<char*>(&registro), sizeof(registro));
-        arquivo.flush();
         arquivo.close();
     } else cerr << endl << "Identificador Invalido!" << endl;
 }
