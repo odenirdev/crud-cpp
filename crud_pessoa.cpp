@@ -101,6 +101,7 @@ class ARQUIVO {
                 arquivo.write(reinterpret_cast<char*>(&registro), sizeof(registro));
                 arquivo.close();
             } else cerr << endl << "Identificador Invalido!" << endl;
+            return;
         }
 
         long int pegarNumerosDePessoas(){
@@ -174,7 +175,7 @@ class SISTEMA{
             cout << endl;
         }
 
-        char * maiusculo(char str[]){
+        char* maiusculo(char str[]){
             int i=0;
             while (str[i]){
                 str[i] = putchar(str[i]);
@@ -204,7 +205,6 @@ class SISTEMA{
             }
             return;
         }
-
 
         void alterarNome(int idRegistro){
             ARQUIVO arquivo;
@@ -286,7 +286,7 @@ class SISTEMA{
             PESSOA pessoa;
             ARQUIVO arquivo;
             int opcao;
-            char opcao1[3];
+            char opcao1[5];
 
             do {
                 limpa();
@@ -298,17 +298,20 @@ class SISTEMA{
                 cout << "Entre com a opcao: ";
                 cin >> opcao;
                 cin.ignore(1000, '\n');
+                pessoa = arquivo.buscarUm(opcao);
                 if (opcao != 0 && opcao <= arquivo.pegarNumerosDePessoas()) {
-                    limpa();
-                    position(1, 1);
-                    cout << "Tem certeza que deseja remover o registro " << opcao << " ?";
-                    cin.getline(opcao1, sizeof(opcao1));
-                    if (strcmp( maiusculo(opcao1), "S") == 0 || strcmp(opcao1, "SI") == 0 || strcmp(opcao1, "SIM" == 0 )){
-                        pessoa = arquivo.buscarUm(opcao);
-                        pessoa.setStatus(0);
-                        arquivo.alterarArquivo(opcao, pessoa);
+                    if (pessoa.getStatus() == 1){
+                        limpa();
+                        position(1, 1);
+                        cout << "Tem certeza que deseja remover o registro " << opcao << " ?";
+                        cin.getline(opcao1, sizeof(opcao1));
+                        if ((strcmp( opcao1, "S") == 0) || (strcmp(opcao1, "SI") == 0) || (strcmp(opcao1, "SIM") == 0)){
+                            pessoa.setStatus(0);
+                            arquivo.alterarArquivo(opcao, pessoa);
+                        }
+                    } else {
+                        cerr << "Registro não encontrado";
                     }
-
                 }
             } while(opcao != 0);
         }
