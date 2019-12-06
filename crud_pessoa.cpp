@@ -11,6 +11,7 @@
 #include<iomanip>
 #include<cctype>
 #include<windows.h>
+#include<locale>
 
 #define ARQUIVO_CRUD "PESSOAS.CRUD"
 
@@ -40,7 +41,7 @@ class PESSOA {
         }
 
         void setNome(char nome[51]){
-            strcpy(this->nome, nome);
+            strcpy(this->nome, maiusculo(nome));
             return;
         }
 
@@ -62,14 +63,18 @@ class PESSOA {
         void setStatus(int status){
           this->status = status;
         }
+
+        char * maiusculo(char palavra[51]){
+            for (int i=0; i < sizeof(palavra); i++) palavra[i] = toupper(palavra[i]);
+            return palavra;
+        }
 };
 
 class ARQUIVO {
     public:
         void pause(void) {
+            cout << endl <<"PRESSIONE QUALQUER TECLA PARA CONTINUAR.  .  .";
             cin.get( );
-            cout << "PRESSIONE QUALQUER TECLA PARA CONTINUAR.  .  .";
-            cout << endl;
         }
 
         void limpa(void) {
@@ -165,23 +170,52 @@ class ARQUIVO {
             arquivo.close();
             return;
         }
+
+        void pesquisarArquivo(char tipo[10], char pesquisa[51]){
+            PESSOA pessoa;
+            int linha = 1;
+            ifstream arquivo(ARQUIVO_CRUD, ios_base::in | ios_base::binary);
+            cout << pesquisa;
+            limpa();
+            position(1, 1);
+            cout << "<Pesquisa pessoa>";
+            for (long pos = 0; pos < pegarNumerosDePessoas(); pos += 1){
+                arquivo.seekg(pos * sizeof(pessoa), // ios::beg - pular
+                ios_base::beg);
+                arquivo.read(reinterpret_cast<char*>(&pessoa), sizeof(pessoa));
+                if (pessoa.getStatus() == 1){
+                    if (strcmp(tipo, "NOME") == 0 && strcmp(pessoa.maiusculo(pesquisa), pessoa.getNome()) == 0){
+                        position(linha += 2, 1);
+                        cout << "<Registro " << pessoa.getId() << ">";
+                        position(linha += 1, 1);
+                        cout << "ID: " << pessoa.getId();
+                        position(linha += 1, 1);
+                        cout << "Nome: " << pessoa.getNome();
+                        position(linha += 1, 1);
+                        cout << "Data de nascimento: " << pessoa.getDataNascimento();
+                    } else if (strcmp(tipo, "DATA") == 0 && strcmp(pesquisa, pessoa.getDataNascimento()) == 0){
+                        position(linha += 2, 1);
+                        cout << "<Registro " << pessoa.getId() << ">";
+                        position(linha += 1, 1);
+                        cout << "ID: " << pessoa.getId();
+                        position(linha += 1, 1);
+                        cout << "Nome: " << pessoa.getNome();
+                        position(linha += 1, 1);
+                        cout << "Data de nascimento: " << pessoa.getDataNascimento();
+                    }
+                }
+            }
+            arquivo.close();
+            pause();
+            return;
+        }
 };
 
 class SISTEMA{
     public:
         void pause(void) {
+            cout << endl <<"PRESSIONE QUALQUER TECLA PARA CONTINUAR.  .  .";
             cin.get( );
-            cout << "PRESSIONE QUALQUER TECLA PARA CONTINUAR.  .  .";
-            cout << endl;
-        }
-
-        char* maiusculo(char str[]){
-            int i=0;
-            while (str[i]){
-                str[i] = putchar(str[i]);
-                i++;
-            }
-            return str;
         }
 
         void limpa(void) {
@@ -376,10 +410,28 @@ class SISTEMA{
         }
 
         void pesquisarNome(){
+            ARQUIVO arquivo;
+            char nome[51];
+            char tipo[5] = "NOME";
+            limpa();
+            position(1, 1);
+            cout << "<Pesquisar por nome>";
+            position(3, 1);
+            cout << "Entre com o nome: "; cin.getline(nome, sizeof(nome));
+            arquivo.pesquisarArquivo(tipo, nome);
             return;
         }
 
         void pesquisarDataNascimento(){
+            ARQUIVO arquivo;
+            char data[11];
+            char tipo[5] = "DATA";
+            limpa();
+            position(1, 1);
+            cout << "<Pesquisar por data de nascimento>";
+            position(3, 1);
+            cout << "Entre com o data: "; cin.getline(data, sizeof(data));
+            arquivo.pesquisarArquivo(tipo, data);
             return;
         }
 
@@ -392,9 +444,9 @@ class SISTEMA{
                 position(2, 1);
                 cout << "1. Cadastrar registro";
                 position(3, 1);
-                cout << "2. Pesuisar por nome";
+                cout << "2. Pesquisar por nome";
                 position(4, 1);
-                cout << "3. Pesuisar por data de nascimento";
+                cout << "3. Pesquisar por data de nascimento";
                 position(5, 1);
                 cout << "4. Remover registro";
                 position(6, 1);
@@ -416,11 +468,12 @@ class SISTEMA{
 
                     case 3:
                         pesquisarDataNascimento();
-                        return;
+                        break;
 
                     case 4:
                         deletar();
                         break;
+
                     case 5:
                         alterar();
                         break;
@@ -444,6 +497,7 @@ class SISTEMA{
 };
 
 int main(void){
+    cout << setiosflags (ios::uppercase);
     SISTEMA sistema;
     sistema.menu();
     return 0;
