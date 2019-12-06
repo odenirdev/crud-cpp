@@ -9,6 +9,7 @@
 #include<fstream>
 #include<cstring>
 #include<iomanip>
+#include<cctype>
 #include<windows.h>
 
 #define ARQUIVO_CRUD "PESSOAS.CRUD"
@@ -65,6 +66,34 @@ class PESSOA {
 
 class ARQUIVO {
     public:
+        void pause(void) {
+            cin.get( );
+            cout << "PRESSIONE QUALQUER TECLA PARA CONTINUAR.  .  .";
+            cout << endl;
+        }
+
+        void limpa(void) {
+            HANDLE TELA;
+            DWORD ESCRITA = 0;
+            COORD POS;
+            TELA = GetStdHandle(STD_OUTPUT_HANDLE);
+            POS.X = 0;
+            POS.Y = 0;
+            FillConsoleOutputCharacter(TELA, 32, 100 * 100, POS, &ESCRITA);
+        }
+
+        void position(int LINHA, int COLUNA) {
+            if (COLUNA >= 1 and COLUNA <= 80 and LINHA >= 1 and LINHA <= 24) {
+                HANDLE TELA;
+                COORD POS;
+                TELA = GetStdHandle(STD_OUTPUT_HANDLE);
+                POS.X = COLUNA - 1;
+                POS.Y = LINHA - 1;
+                SetConsoleCursorPosition(TELA, POS);
+            }
+            return;
+        }
+
         void alterarArquivo(int idRegistro, PESSOA registro){
             if (idRegistro <= this->pegarNumerosDePessoas()){
                 fstream arquivo(ARQUIVO_CRUD, ios_base::out | ios_base::in | ios_base::binary);
@@ -110,18 +139,28 @@ class ARQUIVO {
 
         void buscarTodos(void){
             PESSOA pessoa;
+            int linha = 1;
             ifstream arquivo(ARQUIVO_CRUD, ios_base::in | ios_base::binary);
+            limpa();
+            position(1, 1);
 
-            cout << "<Lista de pessoas cadastradas>" << endl;
+            cout << "<Lista de pessoas cadastradas>";
             for (long pos = 0; pos < pegarNumerosDePessoas(); pos += 1){
                 arquivo.seekg(pos * sizeof(pessoa), // ios::beg - pular
                 ios_base::beg);
                 arquivo.read(reinterpret_cast<char*>(&pessoa), sizeof(pessoa));
-                cout << endl << "<Registro " << pessoa.getId() << ">" << endl;
-                cout << "ID: " << pessoa.getId() << endl;
-                cout << "Nome: " << pessoa.getNome() << endl;
-                cout << "Data de nascimento: " << pessoa.getDataNascimento() << endl;
+                if (pessoa.getStatus() == 1){
+                    position(linha += 2, 1);
+                    cout << "<Registro " << pessoa.getId() << ">";
+                    position(linha += 1, 1);
+                    cout << "ID: " << pessoa.getId();
+                    position(linha += 1, 1);
+                    cout << "Nome: " << pessoa.getNome();
+                    position(linha += 1, 1);
+                    cout << "Data de nascimento: " << pessoa.getDataNascimento();
+                }
             }
+            pause();
             arquivo.close();
             return;
         }
@@ -129,6 +168,44 @@ class ARQUIVO {
 
 class SISTEMA{
     public:
+        void pause(void) {
+            cin.get( );
+            cout << "PRESSIONE QUALQUER TECLA PARA CONTINUAR.  .  .";
+            cout << endl;
+        }
+
+        char * maiusculo(char str[]){
+            int i=0;
+            while (str[i]){
+                str[i] = putchar(str[i]);
+                i++;
+            }
+            return str;
+        }
+
+        void limpa(void) {
+            HANDLE TELA;
+            DWORD ESCRITA = 0;
+            COORD POS;
+            TELA = GetStdHandle(STD_OUTPUT_HANDLE);
+            POS.X = 0;
+            POS.Y = 0;
+            FillConsoleOutputCharacter(TELA, 32, 100 * 100, POS, &ESCRITA);
+        }
+
+        void position(int LINHA, int COLUNA) {
+            if (COLUNA >= 1 and COLUNA <= 80 and LINHA >= 1 and LINHA <= 24) {
+                HANDLE TELA;
+                COORD POS;
+                TELA = GetStdHandle(STD_OUTPUT_HANDLE);
+                POS.X = COLUNA - 1;
+                POS.Y = LINHA - 1;
+                SetConsoleCursorPosition(TELA, POS);
+            }
+            return;
+        }
+
+
         void alterarNome(int idRegistro){
             ARQUIVO arquivo;
             PESSOA pessoa;
@@ -160,17 +237,26 @@ class SISTEMA{
             int opcao;
             int opcao1;
             do {
-                cout << endl << "<Alterar registro de pessoa>" << endl;
-                arquivo.buscarTodos();
-                cout << endl << "Selecione um registro pelo ID ou para sair entre com <0>!" << endl;
+                limpa();
+                position(1, 1);
+                cout << "<Alterar registro de pessoa>";
+                position(3, 1);
+                cout << "Selecione um registro pelo ID ou para sair entre com <0>!";
+                position(4, 1);
                 cout << "Entre com a opcao: ";
                 cin >> opcao;
                 cin.ignore(1000, '\n');
                 if (opcao != 0 && opcao <= arquivo.pegarNumerosDePessoas()){
-                    cout << endl <<"<Opcao de Alteracao>" << endl;
-                    cout << "1. Alterar nome" << endl;
-                    cout << "2. Alterar data de nascimento" << endl;
-                    cout << "0. Sair" << endl;
+                    limpa();
+                    position(1, 1);
+                    cout << "<Opcao de Alteracao>";
+                    position(2, 1);
+                    cout << "1. Alterar nome";
+                    position(3, 1);
+                    cout << "2. Alterar data de nascimento";
+                    position(4, 1);
+                    cout << "0. Sair";
+                    position(6, 1);
                     cout << endl << "Entre com a opcao: ";
                     cin >> opcao1;
                     cin.ignore(1000, '\n');
@@ -188,27 +274,57 @@ class SISTEMA{
                             break;
 
                         default:
-                            cerr << endl << "Opcao Invalida!" << endl;
+                            cerr << "Opcao Invalida!" << endl;
                             break;
                     }
-                } else cerr << endl << "Opcao Invalida!" << endl;
+                } else cerr << "Opcao Invalida!" << endl;
             } while(opcao != 0);
             return;
         }
 
         void deletar(void){
+            PESSOA pessoa;
+            ARQUIVO arquivo;
+            int opcao;
+            char opcao1[3];
 
+            do {
+                limpa();
+                position(1, 1);
+                cout <<"<Remover registro de pessoa>";
+                position(3, 1);
+                cout << "Selecione um registro pelo ID ou para sair entre com <0>!";
+                position(4, 1);
+                cout << "Entre com a opcao: ";
+                cin >> opcao;
+                cin.ignore(1000, '\n');
+                if (opcao != 0 && opcao <= arquivo.pegarNumerosDePessoas()) {
+                    limpa();
+                    position(1, 1);
+                    cout << "Tem certeza que deseja remover o registro " << opcao << " ?";
+                    cin.getline(opcao1, sizeof(opcao1));
+                    if (strcmp( maiusculo(opcao1), "S") == 0 || strcmp(opcao1, "SI") == 0 || strcmp(opcao1, "SIM" == 0 )){
+                        pessoa = arquivo.buscarUm(opcao);
+                        pessoa.setStatus(0);
+                        arquivo.alterarArquivo(opcao, pessoa);
+                    }
+
+                }
+            } while(opcao != 0);
         }
 
         void cadastrar(void){
+            limpa();
             char nome[51];
             char data[11];
             ARQUIVO arquivo;
             PESSOA pessoa;
-
-            cout << endl << "<Cadastrar>"   << endl;
-            cout << endl << "Nome: ";
+            position(1, 1);
+            cout << "<Cadastrar>";
+            position(3, 1);
+            cout << "Nome: ";
             cin.getline(nome, sizeof(nome));
+            position(4, 1);
             cout << "Data de nascimento: ";
             cin.getline(data, sizeof(data));
 
@@ -225,40 +341,67 @@ class SISTEMA{
         void informacoesGerenciais(){
             int opcao;
             ARQUIVO arquivo;
-
-            cout << endl << "<Informacoes gerenciais>"  << endl;
-            cout << endl << "Numero de pessoas: "       << arquivo.pegarNumerosDePessoas() << endl;
-            cout << endl << "Tamanho do arquivo: "      << arquivo.pegarTamanhoDoArquivo() / 8 << " bytes" << endl;
-            cout << endl << "Tamanho do registro: "     << sizeof(PESSOA) / 8 << " bytes" << endl;
-
             do {
-                cout << endl << "<Relatorios>"  << endl;
+                limpa();
+                position(1, 1);
+                cout << "<Informacoes gerenciais>";
+                position(2, 1);
+                cout << "Numero de pessoas: "       << arquivo.pegarNumerosDePessoas();
+                position(3, 1);
+                cout << "Tamanho do arquivo: "      << arquivo.pegarTamanhoDoArquivo() / 8 << " bytes";
+                position(4, 1);
+                cout << "Tamanho do registro: "     << sizeof(PESSOA) / 8 << " bytes";
+
+                position(6, 1);
+                cout << "<Relatorios>";
+                position(7, 1);
                 cout << "1. Listar todos" << endl;
+                position(8, 1);
                 cout << "0. Sair" << endl;
-                cout << endl << "Entre com a opcao :";
+                position(10, 1);
+                cout << "Entre com a opcao :";
                 cin >> opcao;
                 cin.ignore(1000, '\n');
                 switch (opcao){
                     case 1:
                         arquivo.buscarTodos();
+                        limpa();
                         break;
                 }
             } while (opcao != 0);
             return;
         }
 
+        void pesquisarNome(){
+            return;
+        }
+
+        void pesquisarDataNascimento(){
+            return;
+        }
+
         void menu(void){
             int OPCAO;
             do {
-                cout << endl << "<CRUD PESSOA>" << endl;
-                cout << "1. Cadastrar registro"  << endl;
-                cout << "2. Pesuisar por nome" << endl;
-                cout << "3. Pesuisar por data de nascimento" << endl;
-                cout << "4. Remover registro" << endl;
-                cout << "5. Alterar registro" << endl;
-                cout << "6. Informacoes gerenciais" << endl;
-                cout << "0. Sair" << endl;
-                cout << endl << "Por favor! Entre com a opcao desejada: "; cin >> OPCAO; cin.ignore(1000, '\n');
+                limpa();
+                position(1, 1);
+                cout << "<CRUD PESSOA>";
+                position(2, 1);
+                cout << "1. Cadastrar registro";
+                position(3, 1);
+                cout << "2. Pesuisar por nome";
+                position(4, 1);
+                cout << "3. Pesuisar por data de nascimento";
+                position(5, 1);
+                cout << "4. Remover registro";
+                position(6, 1);
+                cout << "5. Alterar registro";
+                position(7, 1);
+                cout << "6. Informacoes gerenciais";
+                position(8, 1);
+                cout << "0. Sair";
+                position(10, 1);
+                cout << "Por favor! Entre com a opcao desejada: "; cin >> OPCAO; cin.ignore(1000, '\n');
                 switch (OPCAO){
                     case 1:
                         cadastrar();
@@ -270,6 +413,7 @@ class SISTEMA{
 
                     case 3:
                         pesquisarDataNascimento();
+                        return;
 
                     case 4:
                         deletar();
@@ -296,8 +440,7 @@ class SISTEMA{
         }
 };
 
-int main(void)
-{
+int main(void){
     SISTEMA sistema;
     sistema.menu();
     return 0;
