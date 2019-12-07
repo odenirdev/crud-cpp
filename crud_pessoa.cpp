@@ -338,6 +338,7 @@ class SISTEMA{
                         limpa();
                         position(1, 1);
                         cout << "Tem certeza que deseja remover o registro " << opcao << " ?";
+                        cout << endl << "SIM ou NAO: ";
                         cin.getline(opcao1, sizeof(opcao1));
                         if ((strcmp( opcao1, "S") == 0) || (strcmp(opcao1, "SI") == 0) || (strcmp(opcao1, "SIM") == 0)){
                             pessoa.setStatus(0);
