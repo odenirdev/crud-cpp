@@ -384,19 +384,12 @@ class SISTEMA{
                 position(1, 1);
                 cout << "<Informacoes gerenciais>";
                 position(2, 1);
-                cout << "Numero de pessoas: "       << arquivo.pegarNumerosDePessoas();
-                position(3, 1);
-                cout << "Tamanho do arquivo: "      << arquivo.pegarTamanhoDoArquivo() / 8 << " bytes";
-                position(4, 1);
-                cout << "Tamanho do registro: "     << sizeof(PESSOA) / 8 << " bytes";
-
-                position(6, 1);
                 cout << "<Relatorios>";
-                position(7, 1);
+                position(3, 1);
                 cout << "1. Listar todos" << endl;
-                position(8, 1);
+                position(4, 1);
                 cout << "0. Sair" << endl;
-                position(10, 1);
+                position(6, 1);
                 cout << "Entre com a opcao :";
                 cin >> opcao;
                 cin.ignore(1000, '\n');
